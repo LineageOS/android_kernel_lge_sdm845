@@ -709,7 +709,7 @@ static ssize_t tfa98xx_dbgfs_start_set(struct file *file,
 	}
 	// EXT_TEMP
 #if defined(TFA_READ_BATTERY_TEMP)
-	ret = tfa98xx_read_battery_temp(&temp_val);
+	ret = tfa98xxTotfa(tfa98xx_read_battery_temp(&temp_val));
 	if (ret)
 		pr_err("error in reading battery temp\n");
 #endif
