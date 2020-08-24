@@ -237,10 +237,10 @@ irqreturn_t touch_irq_thread(int irq, void *dev_id)
 			touch_send_uevent(ts, TOUCH_UEVENT_AI_PICK);
 
 		if (ts->intr_status & TOUCH_IRQ_SWIPE_LEFT2)
-			touch_send_uevent(ts, TOUCH_UEVENT_SIDE_PAY);
+			touch_send_uevent(ts, TOUCH_UEVENT_SWIPE_LEFT2);
 
 		if (ts->intr_status & TOUCH_IRQ_SWIPE_RIGHT2)
-			touch_send_uevent(ts, TOUCH_UEVENT_SIDE_PAY);
+			touch_send_uevent(ts, TOUCH_UEVENT_SWIPE_RIGHT2);
 
 		if (ts->intr_status & TOUCH_IRQ_LPWG_LONGPRESS_DOWN)
 			touch_send_uevent(ts, TOUCH_UEVENT_LPWG_LONGPRESS_DOWN);
@@ -544,6 +544,12 @@ static int touch_init_input(struct touch_core_data *ts)
 	set_bit(BTN_TOUCH, input->keybit);
 	set_bit(BTN_TOOL_FINGER, input->keybit);
 	set_bit(KEY_WAKEUP, input->keybit);
+	set_bit(KEY_GESTURE_SWIPE_UP, input->keybit);
+	set_bit(KEY_GESTURE_SWIPE_DOWN, input->keybit);
+	set_bit(KEY_GESTURE_SWIPE_LEFT, input->keybit);
+	set_bit(KEY_GESTURE_SWIPE_RIGHT, input->keybit);
+	set_bit(KEY_GESTURE_SWIPE_LEFT2, input->keybit);
+	set_bit(KEY_GESTURE_SWIPE_RIGHT2, input->keybit);
 	set_bit(INPUT_PROP_DIRECT, input->propbit);
 	input_set_abs_params(input, ABS_MT_POSITION_X, 0,
 			ts->caps.max_x, 0, 0);
@@ -808,6 +814,8 @@ char *uevent_str[TOUCH_UEVENT_SIZE][2] = {
 	{"TOUCH_GESTURE_WAKEUP=SWIPE_UP", NULL},
 	{"TOUCH_GESTURE_WAKEUP=SWIPE_LEFT", NULL},
 	{"TOUCH_GESTURE_WAKEUP=SWIPE_RIGHT", NULL},
+	{"TOUCH_GESTURE_WAKEUP=SWIPE_RIGHT2", NULL},
+	{"TOUCH_GESTURE_WAKEUP=SWIPE_LEFT2", NULL},
 	{"TOUCH_GESTURE_WAKEUP=WATER_MODE_ON", NULL},
 	{"TOUCH_GESTURE_WAKEUP=WATER_MODE_OFF", NULL},
 	{"TOUCH_GESTURE_WAKEUP=AI_BUTTON", NULL},
@@ -830,48 +838,96 @@ void touch_send_uevent(struct touch_core_data *ts, int type)
 
 	TOUCH_TRACE();
 
-	if (type == TOUCH_UEVENT_DS_UPDATE_STATE) {
-		kobject_uevent_env(&device_uevent_touch.kobj,
-				KOBJ_CHANGE, uevent_str[type]);
-		TOUCH_I("%s\n",  uevent_str[type][0]);
-	} else if (type == TOUCH_UEVENT_WATER_MODE_ON || type == TOUCH_UEVENT_WATER_MODE_OFF
-			|| type == TOUCH_UEVENT_LPWG_LONGPRESS_UP) {
-		kobject_uevent_env(&device_uevent_touch.kobj,
-				KOBJ_CHANGE, uevent_str[type]);
-		TOUCH_I("%s\n",  uevent_str[type][0]);
-		touch_report_all_event(ts);
-	} else if (type == TOUCH_UEVENT_KNOCK) {
-		input_report_key(ts->input, KEY_WAKEUP, 1);
-		TOUCH_I("Simulate power button depress\n");
-		input_sync(ts->input);
-		input_report_key(ts->input, KEY_WAKEUP, 0);
-		TOUCH_I("Simulate power button release\n");
-		input_sync(ts->input);
-	} else {
-		reinit_completion(&ts->uevent_complete);
-
-		if (atomic_read(&ts->state.uevent) != UEVENT_IDLE &&
-				touch_check_boot_mode(ts->dev) == TOUCH_NORMAL_BOOT) {
-			TOUCH_I("%s is waiting", uevent_str[type][0]);
-			ret = wait_for_completion_timeout(&ts->uevent_complete, msecs_to_jiffies(UEVENT_TIMEOUT));
-			if(ret == 0) {
-				TOUCH_E("UEVENT Timedout");
-				return;
-			}
-		}
-
-		if (atomic_read(&ts->state.uevent) == UEVENT_IDLE ||
-				touch_check_boot_mode(ts->dev) != TOUCH_NORMAL_BOOT) {
-			pm_wakeup_event(ts->dev, 3000);
-			atomic_set(&ts->state.uevent, UEVENT_BUSY);
-
+	switch (type) {
+		case TOUCH_UEVENT_DS_UPDATE_STATE:
+			kobject_uevent_env(&device_uevent_touch.kobj,
+					KOBJ_CHANGE, uevent_str[type]);
+			TOUCH_I("%s\n",  uevent_str[type][0]);
+			break;
+		case TOUCH_UEVENT_WATER_MODE_ON:
+		case TOUCH_UEVENT_WATER_MODE_OFF:
+		case TOUCH_UEVENT_LPWG_LONGPRESS_UP:
 			kobject_uevent_env(&device_uevent_touch.kobj,
 					KOBJ_CHANGE, uevent_str[type]);
 			TOUCH_I("%s\n",  uevent_str[type][0]);
 			touch_report_all_event(ts);
-		} else {
-			TOUCH_I("%s  is not sent\n", uevent_str[type][0]);
-		}
+			break;
+		case TOUCH_UEVENT_KNOCK:
+			input_report_key(ts->input, KEY_WAKEUP, 1);
+			TOUCH_I("Simulate power button depress\n");
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_WAKEUP, 0);
+			TOUCH_I("Simulate power button release\n");
+			input_sync(ts->input);
+			break;
+		case TOUCH_UEVENT_SWIPE_DOWN:
+			TOUCH_I("Swipe DOWN reported\n");
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_DOWN, 1);
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_DOWN, 0);
+			input_sync(ts->input);
+			break;
+		case TOUCH_UEVENT_SWIPE_UP:
+			TOUCH_I("Swipe UP reported\n");
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_UP, 1);
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_UP, 0);
+			input_sync(ts->input);
+			break;
+		case TOUCH_UEVENT_SWIPE_LEFT:
+			TOUCH_I("Swipe LEFT reported\n");
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_LEFT, 1);
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_LEFT, 0);
+			input_sync(ts->input);
+			break;
+		case TOUCH_UEVENT_SWIPE_RIGHT:
+			TOUCH_I("Swipe RIGHT reported\n");
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_RIGHT, 1);
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_RIGHT, 0);
+			input_sync(ts->input);
+			break;
+		case TOUCH_UEVENT_SWIPE_LEFT2:
+			TOUCH_I("Swipe LEFT2 reported\n");
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_LEFT2, 1);
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_LEFT2, 0);
+			input_sync(ts->input);
+			break;
+		case TOUCH_UEVENT_SWIPE_RIGHT2:
+			TOUCH_I("Swipe RIGHT2 reported\n");
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_RIGHT2, 1);
+			input_sync(ts->input);
+			input_report_key(ts->input, KEY_GESTURE_SWIPE_RIGHT2, 0);
+			input_sync(ts->input);
+			break;
+		default:
+			reinit_completion(&ts->uevent_complete);
+
+			if (atomic_read(&ts->state.uevent) != UEVENT_IDLE &&
+					touch_check_boot_mode(ts->dev) == TOUCH_NORMAL_BOOT) {
+				TOUCH_I("%s is waiting", uevent_str[type][0]);
+				ret = wait_for_completion_timeout(&ts->uevent_complete, msecs_to_jiffies(UEVENT_TIMEOUT));
+				if(ret == 0) {
+					TOUCH_E("UEVENT Timedout");
+					return;
+				}
+			}
+
+			if (atomic_read(&ts->state.uevent) == UEVENT_IDLE ||
+					touch_check_boot_mode(ts->dev) != TOUCH_NORMAL_BOOT) {
+				pm_wakeup_event(ts->dev, 3000);
+				atomic_set(&ts->state.uevent, UEVENT_BUSY);
+
+				kobject_uevent_env(&device_uevent_touch.kobj,
+						KOBJ_CHANGE, uevent_str[type]);
+				TOUCH_I("%s\n",  uevent_str[type][0]);
+				touch_report_all_event(ts);
+			} else {
+				TOUCH_I("%s  is not sent\n", uevent_str[type][0]);
+			}
+			break;
 	}
 }
 
