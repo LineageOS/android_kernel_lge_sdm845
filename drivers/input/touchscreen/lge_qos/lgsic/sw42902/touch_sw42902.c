@@ -47,6 +47,8 @@ static void sw42902_lcd_mode(struct device *dev, u32 mode);
 static int sw42902_power(struct device *dev, int ctrl);
 static int sw42902_init(struct device *dev);
 
+static int udfps_pressed_status = 0;
+
 static void project_param_set(struct device *dev)
 {
 	struct sw42902_data *d = to_sw49202_data(dev);
@@ -4809,6 +4811,8 @@ int sw42902_irq_lpwg(struct device *dev)
 		sw42902_get_tci_data(dev, 1);
 		ts->intr_status = TOUCH_IRQ_LPWG_LONGPRESS_DOWN;
 		d->longpress_uevent_status = ts->intr_status;
+		udfps_pressed_status = 1;
+		sysfs_notify(&ts->kobj, NULL, "udfps_pressed");
 		break;
 
 	case LONG_PRESS_UP:
@@ -4816,6 +4820,7 @@ int sw42902_irq_lpwg(struct device *dev)
 		sw42902_get_tci_data(dev, 1);
 		ts->intr_status = TOUCH_IRQ_LPWG_LONGPRESS_UP;
 		d->longpress_uevent_status = ts->intr_status;
+		udfps_pressed_status = 0;
 		break;
 
 	case ONE_TAP:
@@ -5751,6 +5756,12 @@ static ssize_t show_gpio_pin(struct device *dev, char *buf)
 	return ret;
 }
 
+static ssize_t show_udfps_pressed(struct device *dev, char *buf)
+{
+	return scnprintf(buf, PAGE_SIZE, "%d\n", udfps_pressed_status);
+}
+
+static TOUCH_ATTR(udfps_pressed, show_udfps_pressed, NULL);
 static TOUCH_ATTR(lpwg_abs, show_lpwg_abs, store_lpwg_abs);
 static TOUCH_ATTR(reg_ctrl, NULL, store_reg_ctrl);
 static TOUCH_ATTR(lpwg_failreason, show_lpwg_failreason, store_lpwg_failreason);
@@ -5769,6 +5780,7 @@ static TOUCH_ATTR(gpio_pin, show_gpio_pin, NULL);
 //static TOUCH_ATTR(burst_test, NULL, store_burst_test);
 
 static struct attribute *sw42902_attribute_list[] = {
+	&touch_attr_udfps_pressed.attr,
 	&touch_attr_reg_ctrl.attr,
 	&touch_attr_lpwg_failreason.attr,
 	&touch_attr_lpwg_abs.attr,
