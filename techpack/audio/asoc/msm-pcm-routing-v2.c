@@ -15436,7 +15436,7 @@ static void AC_setLIMITER(struct tx_control_param_t *ac_params, int16_t threshol
 
 static void AC_setAudioZoom(struct tx_ac_voicefocus_param_t *ac_params, uint16_t zoomlevel)
 {
-	uint16_t AF_level = (zoomlevel*3.3); // Camera Zoom level : 0 ~ 30
+	uint16_t AF_level = ((zoomlevel * 33) / 10); // Camera Zoom level : 0 ~ 30
 
 	ac_params->EffectLevel = AF_level; // [0, 99]
 	ac_params->AudioFocusAngle = 0;
@@ -15451,7 +15451,7 @@ static void AC_setAudioZoom(struct tx_ac_voicefocus_param_t *ac_params, uint16_t
 
 static void AC_setASMR(struct tx_ac_voicefocus_param_t *ac_params, uint16_t zoomlevel)
 {
-	uint16_t AF_level = (zoomlevel*3.3); // Camera Zoom level : 0 ~ 30
+	uint16_t AF_level = ((zoomlevel * 33) / 10); // Camera Zoom level : 0 ~ 30
 
 	ac_params->EffectLevel = AF_level; // [0, 99]
 	ac_params->AudioFocusAngle = 0;
