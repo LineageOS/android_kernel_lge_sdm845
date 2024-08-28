@@ -19,7 +19,7 @@
 #define PEN_DEVICE_COMPATIBLE_NAME "active,pen"
 //struct g_pen_data g_data;
 //struct touch_pen_data *tp;
-struct pen_prediction_data *pp;
+static struct pen_prediction_data *pp;
 u32 pen_debug_mask = 0; //0xFFF;
 
 static const char __used *pen_flow[11] = {
