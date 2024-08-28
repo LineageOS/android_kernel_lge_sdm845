@@ -14,8 +14,5 @@
 
 extern void bob_mode_enable(void);
 extern void bob_mode_disable(void);
-#if defined(CONFIG_MACH_SDM845_STYLE3LM_DCM_JP) || defined(CONFIG_MACH_SDM845_CAYMANSLM)
-bool isEnable;
-#endif
 
 #endif

@@ -20,6 +20,7 @@
 #include "cam_packet_util.h"
 #if defined(CONFIG_MACH_SDM845_STYLE3LM_DCM_JP) || defined(CONFIG_MACH_SDM845_CAYMANSLM)
 #include <soc/qcom/lge/lge_regulator_mode_change.h>
+bool isEnable;
 #endif
 
 static int cam_flash_prepare(struct cam_flash_ctrl *flash_ctrl,
