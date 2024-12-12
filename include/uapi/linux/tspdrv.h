@@ -29,7 +29,7 @@
 #ifndef _TSPDRV_H
 #define _TSPDRV_H
 
-#include <sys/ioctl.h>
+#include "ioctl.h"
 
 /* Constants */
 #define MODULE_NAME                         "tspdrv"
