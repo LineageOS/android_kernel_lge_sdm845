@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "091fb09c_1023a36d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 31496
+      },
+      "writtenOn": "2025-01-01T15:52:14Z",
+      "side": 1,
+      "message": "I\u0027m wondering if this header is needed at all",
+      "revId": "6d76f769ea4575a9f00c89b40287995fc003e4c6",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
