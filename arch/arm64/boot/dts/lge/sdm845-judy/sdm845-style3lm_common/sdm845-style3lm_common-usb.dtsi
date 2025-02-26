@@ -9,7 +9,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-#include "sdm845-judy_common-usb-switch-fusb252.dtsi"
+#include "../sdm845-judy_common/sdm845-judy_common-usb-switch-fusb252.dtsi"
 #include "sdm845-judy_common-usb-lgmd.dtsi"
 
 &pm8998_gpios {
