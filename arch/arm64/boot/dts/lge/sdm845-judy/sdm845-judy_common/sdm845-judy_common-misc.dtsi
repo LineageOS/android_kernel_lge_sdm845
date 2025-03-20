@@ -52,6 +52,11 @@
 					11 12 13 14 15 16 17 18
 				];
 				linux,default-trigger = "none";
+				qcom,lut-flags = <25>;
+				qcom,pause-lo = <500>;
+				qcom,pause-hi = <500>;
+				qcom,ramp-step-ms = <100>;
+				qcom,use-blink;
 			};
 
 			qcom,rgb_1 {
@@ -70,6 +75,11 @@
 					11 12 13 14 15 16 17 18
 				];
 				linux,default-trigger = "none";
+				qcom,lut-flags = <25>;
+				qcom,pause-lo = <500>;
+				qcom,pause-hi = <500>;
+				qcom,ramp-step-ms = <100>;
+				qcom,use-blink;
 			};
 
 			qcom,rgb_2 {
@@ -88,6 +98,11 @@
 					11 12 13 14 15 16 17 18
 				];
 				linux,default-trigger = "none";
+				qcom,lut-flags = <25>;
+				qcom,pause-lo = <500>;
+				qcom,pause-hi = <500>;
+				qcom,ramp-step-ms = <100>;
+				qcom,use-blink;
 			};
 		};
 	};
