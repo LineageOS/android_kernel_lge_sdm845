@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "900aa39f_ac0d0fe0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 31496
+      },
+      "writtenOn": "2025-06-16T07:30:19Z",
+      "side": 1,
+      "message": "\"always on\" is completely broken with this change when using Lineage AIDL",
+      "revId": "dbec02472ec10b9b4c10d14c4ddf501bbe27ce63",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71"
+    }
+  ]
+}
